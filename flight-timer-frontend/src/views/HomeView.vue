@@ -1,78 +1,141 @@
 <template>
-  <div>
-    <div>
-      <button @click="startTimer" :disabled="isTiming">Start</button>
-      <button @click="stopTimer" :disabled="!isTiming">Stop</button>
-    </div>
-    <div v-if="flightTimes.length > 0">
-      <h2>Flight Times</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Pilot</th>
-            <th>Task</th>
-            <th>Date</th>
-            <th>Flight Time (s)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(flightTime, index) in flightTimes" :key="index">
-            <td>{{ flightTime.pilot }}</td>
-            <td>{{ flightTime.task }}</td>
-            <td>{{ formatDate(flightTime.date) }}</td>
-            <td>{{ flightTime.duration.toFixed(1) }}</td>
-          </tr>
-        </tbody>
-      </table>
+  <div id="clock">
+    <span class="time">{{ time }}</span>
+
+    <div class="btn-container">
+      <a id="start" @click="start">Start</a>
+      <a id="stop" @click="stop">Stop</a>
+      <a id="reset" @click="reset">Reset</a>
     </div>
   </div>
+  <button class="bg-blue-300 rounded text-2xl px-4 py-2 m-8 mx-auto">Submit flight time</button>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-interface FlightTime {
-  pilot: string
-  task: string
-  date: Date
-  duration: number
+let time = ref('00:00:00.000')
+
+let timeBegan = ref(null)
+let timeStopped = ref(null)
+let stoppedDuration = ref(0)
+let started = ref(null)
+let running = ref(false)
+
+function submitFlight() {
+  //call backend api to submit flight time to db
 }
 
-const isTiming = ref(false)
-const flightTimes = ref<FlightTime[]>([])
-let startTime: Date | null = null
-let timerId: number | null = null
+function start() {
+  if (running.value) return
 
-function startTimer() {
-  if (!isTiming.value) {
-    startTime = new Date()
-    timerId = setInterval(() => {
-      const currentTime = new Date()
-      const duration = Math.floor((currentTime.getTime() - startTime!.getTime()) / 100) / 10
-      flightTimes.value.push({
-        pilot: 'John Doe',
-        task: 'Task 1',
-        date: new Date(),
-        duration
-      })
-    }, 100)
-    isTiming.value = true
+  if (timeBegan.value === null) {
+    reset()
+    timeBegan.value = new Date()
   }
-}
 
-function stopTimer() {
-  if (isTiming.value) {
-    clearInterval(timerId!)
-    timerId = null
-    startTime = null
-    isTiming.value = false
+  if (timeStopped.value !== null) {
+    stoppedDuration.value += new Date() - timeStopped.value
   }
+
+  started.value = setInterval(clockRunning, 10)
+  running.value = true
 }
 
-function formatDate(date: Date) {
-  const year = date.getFullYear().toString()
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  return `${year}-${month}-${day}`
+function stop() {
+  running.value = false
+  timeStopped.value = new Date()
+  clearInterval(started.value)
+}
+
+function reset() {
+  running.value = false
+  clearInterval(started.value)
+  stoppedDuration.value = 0
+  timeBegan.value = null
+  timeStopped.value = null
+  time.value = '00:00:00.000'
+}
+
+function clockRunning() {
+  var currentTime = new Date(),
+    timeElapsed = new Date(currentTime - timeBegan.value - stoppedDuration.value),
+    hour = timeElapsed.getUTCHours(),
+    min = timeElapsed.getUTCMinutes(),
+    sec = timeElapsed.getUTCSeconds(),
+    ms = timeElapsed.getUTCMilliseconds()
+
+  time.value =
+    zeroPrefix(hour, 2) +
+    ':' +
+    zeroPrefix(min, 2) +
+    ':' +
+    zeroPrefix(sec, 2) +
+    '.' +
+    zeroPrefix(ms, 3)
+}
+
+function zeroPrefix(num, digit) {
+  var zero = ''
+  for (var i = 0; i < digit; i++) {
+    zero += '0'
+  }
+  return (zero + num).slice(-digit)
 }
 </script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+#clock {
+  order: 0;
+  flex: 0 1 auto;
+  align-self: center;
+  color: rgb(200, 200, 200);
+}
+
+#clock .time {
+  font-size: 4.5em;
+}
+
+#clock .text {
+  margin-top: 30px;
+  font-size: 1em;
+  color: rgba(200, 200, 200, 0.4);
+  text-align: center;
+}
+
+#clock .text a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.1s ease-out;
+}
+
+#clock .text a:hover {
+  color: rgb(200, 200, 200);
+}
+
+#clock .btn-container {
+  display: flex;
+  margin-top: 15px;
+}
+
+#clock .btn-container a {
+  text-align: center;
+  font-family: 'Share Tech Mono', sans-serif;
+  background: transparent;
+  border: none;
+  color: rgb(200, 200, 200);
+  padding: 10px 15px;
+  margin: 0 10px;
+  text-transform: uppercase;
+  font-size: 2em;
+  cursor: pointer;
+  flex-grow: 1;
+  transition: color 0.1s ease-out;
+}
+
+#clock .btn-container a:hover {
+  color: black;
+}
+</style>
