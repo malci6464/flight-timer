@@ -1,0 +1,27 @@
+[
+    {
+        "pilot_name": "John Doe",
+        "task_name": "Task 1",
+        "flight_time": 34.5
+    },
+    {
+        "pilot_name": "Jane Smith",
+        "task_name": "Task 2",
+        "flight_time": 45.2
+    },
+    {
+        "pilot_name": "Bob Johnson",
+        "task_name": "Task 1",
+        "flight_time": 28.1
+    },
+    {
+        "pilot_name": "Sarah Lee",
+        "task_name": "Task 3",
+        "flight_time": 52.7
+    },
+    {
+        "pilot_name": "David Kim",
+        "task_name": "Task 2",
+        "flight_time": 41.8
+    }
+]

@@ -1,20 +1,24 @@
 <template>
+  <div>Username</div>
+  <div>Flight ID:</div>
   <div id="clock">
     <span class="time">{{ time }}</span>
 
-    <div class="btn-container">
-      <a id="start" @click="start">Start</a>
-      <a id="stop" @click="stop">Stop</a>
-      <a id="reset" @click="reset">Reset</a>
+    <div class="btn-container my-2">
+      <a id="start" @click="start" class="ring-1 rounded ring-slate-400">Start</a>
+      <a id="stop" @click="stop" class="ring-1 rounded ring-slate-400">Stop</a>
+      <a id="reset" @click="reset" class="ring-1 rounded ring-slate-400">Reset</a>
     </div>
   </div>
-  <button class="bg-blue-300 rounded text-2xl px-4 py-2 m-8 mx-auto">Submit flight time</button>
+  <button class="bg-blue-300 rounded text-2xl px-4 py-2 m-8 mx-auto" @click="submitFlight">
+    Submit flight time
+  </button>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-let time = ref('00:00:00.000')
+let time = ref('00:00.000')
 
 let timeBegan = ref(null)
 let timeStopped = ref(null)
@@ -24,6 +28,17 @@ let running = ref(false)
 
 function submitFlight() {
   //call backend api to submit flight time to db
+  fetch('http://localhost:3000/log-flight-time', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      pilotName: 'Bob Johnson',
+      taskName: 'Task 1',
+      flightTime: 28.1
+    })
+  })
 }
 
 function start() {
@@ -54,25 +69,21 @@ function reset() {
   stoppedDuration.value = 0
   timeBegan.value = null
   timeStopped.value = null
-  time.value = '00:00:00.000'
+  time.value = '00:00.0'
 }
 
 function clockRunning() {
   var currentTime = new Date(),
     timeElapsed = new Date(currentTime - timeBegan.value - stoppedDuration.value),
-    hour = timeElapsed.getUTCHours(),
+    // hour = timeElapsed.getUTCHours(),
     min = timeElapsed.getUTCMinutes(),
     sec = timeElapsed.getUTCSeconds(),
-    ms = timeElapsed.getUTCMilliseconds()
+    ms = Math.floor(timeElapsed.getUTCMilliseconds() / 100)
 
   time.value =
-    zeroPrefix(hour, 2) +
-    ':' +
-    zeroPrefix(min, 2) +
-    ':' +
-    zeroPrefix(sec, 2) +
-    '.' +
-    zeroPrefix(ms, 3)
+    // zeroPrefix(hour, 2) +
+    // ':' +
+    zeroPrefix(min, 2) + ':' + zeroPrefix(sec, 2) + '.' + zeroPrefix(ms, 1)
 }
 
 function zeroPrefix(num, digit) {
@@ -113,11 +124,6 @@ function zeroPrefix(num, digit) {
 
 #clock .text a:hover {
   color: rgb(200, 200, 200);
-}
-
-#clock .btn-container {
-  display: flex;
-  margin-top: 15px;
 }
 
 #clock .btn-container a {
