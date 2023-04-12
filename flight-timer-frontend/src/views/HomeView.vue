@@ -1,18 +1,21 @@
 <template>
-  <div>Username</div>
-  <div>Flight ID:</div>
-  <div id="clock">
-    <span class="time">{{ time }}</span>
+  <div class="p-4">
+    <div>Username</div>
+    <div>Flight ID:</div>
+    <div id="clock">
+      <span class="time">{{ time }}</span>
 
-    <div class="btn-container my-2">
-      <a id="start" @click="start" class="ring-1 rounded ring-slate-400">Start</a>
-      <a id="stop" @click="stop" class="ring-1 rounded ring-slate-400">Stop</a>
-      <a id="reset" @click="reset" class="ring-1 rounded ring-slate-400">Reset</a>
+      <div class="btn-container my-2">
+        <a id="start" @click="start" class="ring-1 rounded ring-slate-400">Start</a>
+        <a id="stop" @click="stop" class="ring-1 rounded ring-slate-400">Stop</a>
+        <a id="reset" @click="reset" class="ring-1 rounded ring-slate-400">Reset</a>
+      </div>
     </div>
+    <button class="bg-blue-300 rounded text-2xl px-4 py-2 m-8 mx-auto" @click="submitFlight">
+      Submit flight time
+    </button>
+    <span>Your flights</span>
   </div>
-  <button class="bg-blue-300 rounded text-2xl px-4 py-2 m-8 mx-auto" @click="submitFlight">
-    Submit flight time
-  </button>
 </template>
 
 <script setup lang="ts">
@@ -106,7 +109,7 @@ function zeroPrefix(num, digit) {
 }
 
 #clock .time {
-  font-size: 4.5em;
+  font-size: 3.5em;
 }
 
 #clock .text {
@@ -135,7 +138,7 @@ function zeroPrefix(num, digit) {
   padding: 10px 15px;
   margin: 0 10px;
   text-transform: uppercase;
-  font-size: 2em;
+  font-size: 1.5em;
   cursor: pointer;
   flex-grow: 1;
   transition: color 0.1s ease-out;
