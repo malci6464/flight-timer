@@ -1,11 +1,26 @@
 <template>
-  <div class="p-4">
-    <div>Username</div>
-    <div>Flight ID:</div>
-    <div id="clock">
+  <div class="p-4 flex flex-col justify-center">
+    <div class="flex flex-col space-y-2 max-w-lg mb-12 mx-auto justify-center">
+      <label class="text-gray-200 font-medium" for="username">Username:</label>
+      <input
+        class="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
+        type="text"
+        id="username"
+        v-model="userName"
+      />
+
+      <label class="text-gray-200 font-medium" for="flight-name">Flight name:</label>
+      <input
+        class="border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
+        type="text"
+        id="flight-name"
+        v-model="flightName"
+      />
+    </div>
+    <div id="clock" class="my-12">
       <span class="time">{{ time }}</span>
 
-      <div class="btn-container my-2">
+      <div class="btn-container my-2 text-sm">
         <a id="start" @click="start" class="ring-1 rounded ring-slate-400">Start</a>
         <a id="stop" @click="stop" class="ring-1 rounded ring-slate-400">Stop</a>
         <a id="reset" @click="reset" class="ring-1 rounded ring-slate-400">Reset</a>
@@ -14,12 +29,14 @@
     <button class="bg-blue-300 rounded text-2xl px-4 py-2 m-8 mx-auto" @click="submitFlight">
       Submit flight time
     </button>
-    <span>Your flights</span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { useGlobalStore } from '@/stores/global'
+
+const globalStore = useGlobalStore()
 
 let time = ref('00:00.000')
 
@@ -29,19 +46,37 @@ let stoppedDuration = ref(0)
 let started = ref(null)
 let running = ref(false)
 
-function submitFlight() {
-  //call backend api to submit flight time to db
-  fetch('http://localhost:3000/log-flight-time', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      pilotName: 'Bob Johnson',
-      taskName: 'Task 1',
-      flightTime: 28.1
+let userName = ref('')
+let flightName = ref('')
+
+function convertToFloatForDb(stringVal: string) {
+  const [minutes, seconds] = stringVal.split(':')
+  const timeInSeconds = parseInt(minutes) * 60 + parseFloat(seconds)
+  console.log(timeInSeconds)
+  return timeInSeconds
+}
+
+async function submitFlight() {
+  //todo - check for valid data
+
+  let flightTimeInSecs = convertToFloatForDb(time.value)
+  if (userName.value === '' || flightName.value === '' || time.value === '00:00.000') {
+    console.log('invalid data')
+  } else {
+    //todo show success fail popup
+    //call backend api to submit flight time to db
+    fetch(globalStore.backendUrl + 'log-flight-time', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pilotName: userName.value,
+        taskName: flightName.value,
+        flightTime: flightTimeInSecs
+      })
     })
-  })
+  }
 }
 
 function start() {
@@ -109,12 +144,12 @@ function zeroPrefix(num, digit) {
 }
 
 #clock .time {
-  font-size: 3.5em;
+  font-size: 2.5em;
 }
 
 #clock .text {
   margin-top: 30px;
-  font-size: 1em;
+  font-size: 0.5em;
   color: rgba(200, 200, 200, 0.4);
   text-align: center;
 }

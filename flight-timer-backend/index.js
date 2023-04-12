@@ -11,9 +11,32 @@ const app = express();
 // Use the Body Parser middleware to parse JSON request bodies
 app.use(bodyParser.json());
 
+app.get("/flight-times", async (req, res) => {
+  try {
+    // Connect to the MySQL database
+    const connection = mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+    });
+
+    connection.query("SELECT * FROM new_table;", (error, results) => {
+      if (error) {
+        console.log(error);
+        res.status(500).send("Error retrieving flight times");
+      } else {
+        res.status(200).send(results);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error retrieving flight times");
+  }
+});
+
 // Define a route to handle POST requests to log flight times
 app.post("/log-flight-time", (req, res) => {
-  console.log("hello!!!!");
   const pilotName = req.body.pilotName;
   const taskName = req.body.taskName;
   const flightTime = req.body.flightTime;
